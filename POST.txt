@@ -19,3 +19,39 @@ Feature: POST a project id ataachment
     Then print responseType
 
 
+Feature: Create Project
+
+ Background:
+   * def tokenAccess = call read('classpath:examples/project/accessToken.feature')
+   * def token = tokenAccess.token
+   Given  url urlTest
+   And header  Content-Type = 'application/json'
+   And header  Authorization = 'Bearer ' + token
+   And path 'projects/'
+
+   @Post
+   Scenario Outline: Post project
+   * def readJSFunction = read('classpath:examples/project/resource/fun.js')
+   * def seed = 8
+   * def randomCode = readJSFunction(seed)
+   * def postProject = read('classpath:examples/project/request/createProjectParam.json')
+   * set postProject.code =  randomCode
+   * set postProject.name = '<name>'
+   * set postProject.description = '<description>'
+
+    Given header Content-Type = 'application/json'
+    And request postProject
+    When method POST
+    Then status <statusCode>
+    Then print response.id
+    * def projectID =  response.id
+    * print projectID
+    And match responseType == 'json'
+    * def ProjectSchema = read('classpath:examples/project/response/rss_Project.json')
+    Then match  response == ProjectSchema
+    Then match $.name == '<name>'
+    Then match $.description == '<description>'
+
+    Examples:
+      |   name       |              description          |statusCode|
+      |Auto-PRB      |Proyecto creado desde Auto.AS      |    201   |
