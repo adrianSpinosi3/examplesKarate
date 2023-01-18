@@ -1,0 +1,40 @@
+Feature: First patch
+  Background:
+    * def tokenAccess = call read('classpath:examples/project/accessTkn.feature')
+    * def token = tokenAccess.token
+    * def ID = call read('classpath:examples/project/POST/CreateProject.feature@Post')
+    * def idPatch = ID.projectID
+    Given  url urlTest
+    And header  accept = 'application/json'
+    And header  Authorization = 'Bearer ' + token
+    And header  Content-Type = 'application/json'
+    And path 'projects/' + idPatch
+
+    @PatchById
+   Scenario Outline:get a project by uuuid
+    * def patchProject = read('classpath:examples/project/request/patchProject.json')
+    * set patchProject.name = '<name>'
+    * set patchProject.description = '<description>'
+    Given request patchProject
+    When method PATCH
+    Then status 200
+    * def patchSchemaResponse = read('classpath:examples/project/response/rss_Project.json')
+    Then match response == patchSchemaResponse
+    Then match $.name == '<name>'
+    Then match $.description == '<description>'
+
+
+    #Se borra el projecto modificado para hacer un scnario limpio
+      Given  url urlTest
+      And header  Content-Type = 'application/json'
+      And header  Authorization = 'Bearer ' + token
+      And header accept = '*/*'
+      And path 'projects/'
+      * def idJson = read('classpath:examples/project/request/idProject.json')
+      * set  idJson.ids.[0] = idPatch
+      And  request idJson
+      When method DELETE
+      Then status 200
+    Examples:
+    |name                                      |description                 |
+    |Proyecto modificado.AS31		       |Descripcion modificada.AS31 |

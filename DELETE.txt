@@ -1,0 +1,34 @@
+Feature: Delete projects
+  Background: ds
+    * def tokenAccess = call read('classpath:examples/project/access.feature')
+    * def token = tokenAccess.token
+    * def idAccess = call read('classpath:examples/project/POST/CreateProject.feature@Post')
+    * def idDelete = idAccess.projectID
+    * print idDelete
+    Given  url urlTest
+    And header  Content-Type = 'application/json'
+    And header  Authorization = 'Bearer ' + token
+    And header accept = '*/*'
+    And path 'projects/'
+
+    @DeleteAutomated
+   Scenario Outline: Automated and independent Delete
+     * def idJson = read('classpath:examples/project/request/idProject.json')
+     * set  idJson.ids.[0] = idDelete
+     Given  request idJson
+     When method DELETE
+     Then status <statusCode>
+     #consulta validando que el projecto del id eliminado no este disponible
+      Given url urlTest
+      And header  Content-Type = 'application/json'
+      And header  Authorization = 'Bearer ' + token
+      And path 'projects/' + idDelete
+      When method GET
+      Then status 404
+      #Validaciones
+      And match responseType == 'json'
+      And match response == read(('classpath:examples/project/response/404notFound.json'))
+
+      Examples:
+      |statusCode|
+      |200       |

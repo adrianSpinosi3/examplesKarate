@@ -1,0 +1,58 @@
+Feature: Get principal
+  Background:
+    * def tokenAccess = call read('classpath:examples/project/accessToken.feature')
+    * def token = tokenAccess.token
+    Given  url urlTest
+    And header  accept = 'application/json'
+    And header  Authorization = 'Bearer ' + token
+    And path 'projects/'
+
+    @Get
+    Scenario:get all projects and validate first project fields
+     When method get
+     Then status 200
+   * def firstProjectID = response.data[0].id
+   * def firstProjectResponse = response.data[0]
+   * def firstProjectSchema = read('classpath:examples/project/response/rs_firstProject.json')
+     #Validaciones
+     And match responseType == 'json'
+     And match firstProjectResponse == firstProjectSchema
+
+
+○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○○•••○
+
+Feature: Get project by id
+  Background:
+    * def tokenAccess = call read('classpath:examples/project/accessToken.feature')
+    * def token = tokenAccess.token
+    * def ID = call read('classpath:examples/project/GET/GetProject.feature')
+    * def firstIDAccess = ID.firstProjectID
+    Given  url urlTest
+    And header  accept = 'application/json'
+    And header  Authorization = 'Bearer ' + token
+    And path 'projects/' + firstIDAccess
+
+
+  @GetProyectID
+  Scenario:get a project by uuuid
+    When method get
+    Then status 200
+
+     #Validaciones
+    And match responseType == 'json'
+    * def schemaJson = read('classpath:examples/project/response/rs_idProject.json')
+    And match response == schemaJson
+
+   @GetUsers
+   Scenario:get a project by uuuid
+    And path '/users'
+    When method get
+    Then status 200
+    Then print response
+
+   @GetUsersUnassigned
+   Scenario:get a unassigned
+    And path '/unassigned'
+    When method get
+    Then status 200
+    Then print response

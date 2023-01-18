@@ -1,0 +1,17 @@
+Background: URL y Headers
+    Given url 'url'
+    And header Content-Type = 'application/x-www-form-urlencoded'
+
+   @tokenP
+   Scenario Outline: get token
+    Given path 'path
+    And request 'request'
+    When method <operation>
+    Then status <status>
+    * print response
+    * def token = response.access_token
+    * print token
+
+    Examples:
+      |operation   |status   |username      |password|
+      |POST        |200      |useruser	    |  passwordpassword|

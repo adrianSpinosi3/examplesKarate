@@ -1,0 +1,21 @@
+Feature: POST a project id ataachment
+  Background:
+    * def tokenAccess = call read('classpath:examples/project/accessToken.feature')
+    * def token = tokenAccess.token
+    * def ID = call read('classpath:examples/project/POST/CreateProject.feature@Post')
+    * def idP = ID.projectID
+    Given  url urlTest
+    And header  Authorization = 'Bearer ' + token
+    And path 'projects/' + idP + '/attachment'
+
+    @attachment
+   Scenario: modificacion de archivo attachment
+    And header  accept = 'application/json'
+    And header Content-Type = 'multipart/form-data'
+    And multipart file myFile = { read: 'mnd.jpg', contentType: 'image/jpg' }
+    When method post
+    Then status 201
+    Then print response
+    Then print responseType
+
+
