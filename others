@@ -1,0 +1,100 @@
+@Test
+Feature: sample project
+
+ Background:
+   * def tokenAccess = call read('classpath:examples/project/accessToken.feature')
+   * def token = tokenAccess.token
+   Given  url urlTest
+   And header  Content-Type = 'application/json'
+   And header  Authorization = 'Bearer ' + token
+   And path 'projects/'
+
+
+   @Deletesprj
+  Scenario Outline: Delete project
+   * def idJson = read('classpath:examples/project/request/idProject.json')
+   * def deleteR = read('classpath:examples/project/response/404notFound.json')
+   Given header accept = '*/*'
+   And set idJson.ids = ['<projectID>']
+   And  request idJson
+   When method DELETE
+   Then status 200
+    #verificando que el project este borrado segun el id
+   Given url urlTest
+   And header  Content-Type = 'application/json'
+   And header  Authorization = 'Bearer ' + token
+   And path 'projects/' + '<projectID>'
+   When method get
+   Then status 404
+     #Validaciones
+   Then match response.status =='#present'
+   Then match response.status =='#number'
+   Then match response.code =='#present'
+   Then match response.code =='#string'
+   Then match response.error =='#present'
+   Then match response.error =='#string'
+   Then match response == deleteR
+    Examples:
+    |projectID|
+    |projectID-1dc2-4707-projectID-sf6s54fs8f4|
+    |projectID-5hf5-49ññ-projectID-fs64sdf54fs|
+
+
+
+
+
+
+
+
+
+
+
+
+  Scenario Outline: Get project by id
+   Given path '<projectID>'
+   When method get
+   Then status 200
+   Then print response
+    Examples:
+     |projectID|
+     |15sds545dsd45s4d|
+
+
+
+
+  @Field
+  Scenario: field validates
+   When method get
+   Then status 200
+   * def fp = response.data[0]
+   And match fp.id == '#uuid'
+   And match fp.name == '#string'
+   And match fp.code == '#string'
+   And match fp.description == '#string'
+   And match fp.createdDate == '#string'
+   * def cb = response.data[0].createdBy
+   And match cb.id == '#uuid'
+   And match cb.firstName == '#string'
+   And match cb.lastName == '#string'
+   And match cb.email == '#string'
+   And match cb.username == '#string'
+   And match cb.enabled == '#boolean'
+
+   @PostAndDelete
+    Scenario: Post and delete project
+      #POST
+    Given header Content-Type = 'application/json'
+    And request read('classpath:examples/project/request/createUser.json')
+    When method POST
+    Then status 201
+    And  match $.id =='#present'
+     #fetch the project
+    * def projectId = $.id
+    * print projectId
+     #DELETE
+     Given  url urlTestManager
+     And path 'projects/' + projectId
+     And header accept = '*/*'
+     And header  Authorization = 'Bearer '+ token
+     When method DELETE
+     Then status 200
