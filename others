@@ -98,3 +98,14 @@ Feature: sample project
      And header  Authorization = 'Bearer '+ token
      When method DELETE
      Then status 200
+     
+     
+     #Filter
+     Scenario:get all projects by filtering field
+      When method get
+      Then status 200
+     * def fun = function(x){ return x.name.startsWith('AUT-PRB') }
+     * def filtered = karate.filter(response.data, fun)
+     * def ids = $filtered[*].id
+     * print filtered
+     * print ids
